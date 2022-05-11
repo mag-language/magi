@@ -1,3 +1,6 @@
+pub mod types;
+pub mod interpreter;
+
 #[cfg(test)]
 mod tests {
     #[test]
