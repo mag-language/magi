@@ -1,14 +1,17 @@
 use std::collections::HashMap;
 
-use crate::types::{Environment};
+use crate::types::environment::Environment;
 
 use magc::types::{
     Expression,
     ExpressionKind,
     Method,
     Call,
+    Infix,
     Block,
     Pattern,
+    PairPattern,
+    ValuePattern,
 };
 
 pub struct Interpreter {
@@ -35,7 +38,10 @@ impl Interpreter {
         match expression.kind {
             ExpressionKind::Method(method) => self.define_method(method),
             ExpressionKind::Call(call)     => self.call_method(call, environment_opt),
-            //ExpressionKind::Infix(infix)   => self.evaluate_infix(infix),
+            ExpressionKind::Literal(_)     => { return Ok(expression) },
+            ExpressionKind::List(_)        => { return Ok(expression) },
+            ExpressionKind::Type           => { return Ok(expression) },
+            ExpressionKind::Infix(infix)   => self.evaluate_infix(infix, environment_opt),
 
             _ => Err(InterpreterError::Unimplemented),
         }
@@ -88,10 +94,22 @@ impl Interpreter {
                 let (sig, body, vars) = matching_receivers[0].clone();
                 println!("matching_receiver: {:#?}\n\n{:#?}", body, vars);
 
-                // check if single expression, in this case evaluate and return
-                //
-                // otherwise it's a block, iterate and evaluate each of the expressions
-                // using the extracted variables as the function scope.
+                // Evaluate a single expression or the children of a block.
+                match body.kind {
+                    ExpressionKind::Block(mut block) => {
+                        let last_child = block.children.pop();
+
+                        for expr in block.children {
+                            self.evaluate(Box::new(expr.clone()), environment_opt.clone());
+                        }
+
+                        return Err(InterpreterError::Unimplemented)
+                    },
+
+                    _ => {
+                        return self.evaluate(body, environment_opt.clone())
+                    },
+                }
             } else {
                 return Err(InterpreterError::NoMatchingReceiver)
             }
@@ -107,6 +125,41 @@ impl Interpreter {
         } else {
             Err(InterpreterError::NoMatchingMultimethod)
         }
+    }
+
+    fn pattern_or_value_pattern(&self, expression: Box<Expression>) -> Pattern {
+        match expression.kind {
+            ExpressionKind::Pattern(pattern) => pattern,
+
+            _ => Pattern::Value(ValuePattern {
+                expression,
+            }),
+        }
+    }
+
+    fn evaluate_infix(
+        &mut self,
+        infix: Infix,
+        // An optional environment used for variables in local scope.
+        environment_opt: Option<Environment>,
+    ) -> Result<Box<Expression>, InterpreterError> {
+        let left = self.evaluate(infix.left.clone(), environment_opt.clone())?.clone();
+        let right = self.evaluate(infix.right.clone(), environment_opt.clone())?.clone();
+
+        let signature = Some(Pattern::Pair(
+            PairPattern {
+                left:  Box::new(self.pattern_or_value_pattern(left)),
+                right: Box::new(self.pattern_or_value_pattern(right)),
+            }
+        ));
+
+        self.call_method(
+            Call {
+                name: infix.operator.lexeme,
+                signature,
+            },
+            environment_opt,
+        )
     }
 }
 
