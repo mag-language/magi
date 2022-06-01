@@ -1,3 +1,3 @@
-mod environment;
+pub mod environment;
 
 pub use self::environment::*;
