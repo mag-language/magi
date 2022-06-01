@@ -2,6 +2,7 @@ use magc::*;
 
 use std::collections::HashMap;
 
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Environment {
     entries: HashMap<VariablePattern, Box<Expression>>,
 }
