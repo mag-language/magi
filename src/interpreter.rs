@@ -18,6 +18,8 @@ use magc::types::{
     VariablePattern,
 };
 
+pub type InterpreterResult = Result<Box<Expression>, InterpreterError>;
+
 pub struct Interpreter {
     environment: Environment,
     methods: HashMap<String, Multimethod>,
@@ -186,7 +188,7 @@ impl Interpreter {
         }
     }
 
-    fn get_multimethod(&self, name: &String) -> Result<Multimethod, InterpreterError> {
+    pub fn get_multimethod(&self, name: &String) -> Result<Multimethod, InterpreterError> {
         if let Some(multimethod) = self.methods.get(name) {
             Ok(multimethod.clone())
         } else {
