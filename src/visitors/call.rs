@@ -14,6 +14,7 @@ pub struct CallVisitor;
 
 impl Visitor for CallVisitor {
     fn evaluate(
+        &self,
         interpreter: &mut Interpreter,
         environment_opt: Option<Environment>,
         expression: Expression,
