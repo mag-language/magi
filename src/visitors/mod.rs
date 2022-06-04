@@ -7,13 +7,13 @@ use crate::interpreter::{
     Interpreter,
     InterpreterResult,
 };
+use magc::types::Expression;
 
 /// A piece of code that knows how to evaluate a specific kind of expression.
-pub trait Visitor<K> {
-    fn parse(
-        &self,
+pub trait Visitor {
+    fn evaluate(
         interpreter: &mut Interpreter,
         environment_opt: Option<Environment>,
-        expr: K,
-    ) -> InterpreterResult;
+        expr: Expression,
+    ) -> InterpreterResult where Self: Sized;
 }
