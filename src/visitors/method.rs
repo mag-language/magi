@@ -1,4 +1,5 @@
 use crate::types::environment::Environment;
+use crate::interpreter::Multimethod;
 use crate::visitors::Visitor;
 
 use crate::interpreter::{
@@ -10,9 +11,9 @@ use crate::interpreter::{
 use magc::types::{Method, Expression, ExpressionKind, Literal};
 use magc::type_system::Typed;
 
-pub struct CallVisitor;
+pub struct MethodVisitor;
 
-impl Visitor for CallVisitor {
+impl Visitor for MethodVisitor {
     fn evaluate(
         &self,
         interpreter: &mut Interpreter,
