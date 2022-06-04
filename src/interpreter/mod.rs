@@ -2,7 +2,10 @@ use std::collections::{HashMap, BTreeMap};
 
 use crate::types::environment::Environment;
 
-use crate::visitors::Visitor;
+use crate::visitors::{
+    Visitor,
+    CallVisitor,
+};
 
 use magc::type_system::Typed;
 
@@ -31,10 +34,14 @@ pub struct Interpreter {
 
 impl Interpreter {
     pub fn new() -> Self {
+        let mut visitors = HashMap::new();
+
+        visitors.insert("CallExpression".to_string(), &CallVisitor as &dyn Visitor);
+
         Self {
             environment: Environment::new(),
             methods:     HashMap::new(),
-            visitors:    HashMap::new(),
+            visitors,
             recursion_level: 0,
         }
     }
@@ -49,7 +56,13 @@ impl Interpreter {
     ) -> Result<Box<Expression>, InterpreterError> {
         println!("evaluating: --- {:#?}", expression.kind);
 
-        match expression.kind {
+        match self.visitors.get(&expression.get_type().unwrap()) {
+            Some(visitor) => visitor.evaluate(self, environment_opt, *expression),
+
+            _ => Err(InterpreterError::Unimplemented),
+        }
+
+        /*match expression.kind {
             ExpressionKind::Method(method) => self.define_method(method),
             ExpressionKind::Call(call)     => self.call_method(call, environment_opt),
             ExpressionKind::Literal(_)     => { return Ok(expression) },
@@ -65,7 +78,7 @@ impl Interpreter {
             })),
 
             _ => Err(InterpreterError::Unimplemented),
-        }
+        }*/
     }
 
     fn define_method(
