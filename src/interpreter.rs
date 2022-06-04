@@ -354,9 +354,9 @@ impl Multimethod {
         environment_opt: Option<Environment>,
     ) -> Result<Vec<(Environment, Box<Expression>, usize)>, InterpreterError> {
 
-        let matching_receivers = self.receivers
+        self.receivers
             .iter()
-            // Filter out receivers if their signature doesn't match.
+            // Filter out any receivers which don't have a matching signature.
             .filter(|receiver| {
                 !self::match_pattern(
                     receiver.signature.clone(),
@@ -364,9 +364,9 @@ impl Multimethod {
                 )
             })
             // Convert the matching receivers to a tuple containing the extracted variables,
-            // the body expression and the pattern's precedence (or specificity).
+            // the body expression and the pattern's precedence to simplify sorting later.
             .map(|receiver| {
-                (
+                Ok((
                     // Extract the variables which will be bound to function scope.
                     self::match_pattern_and_extract(
                         receiver.signature.clone(),
@@ -374,11 +374,9 @@ impl Multimethod {
                     ),
                     receiver.body.clone(),
                     self::get_precedence(call.signature.clone()),
-                )
+                ))
             })
-            .collect();
-
-        Ok(matching_receivers)
+            .collect()
     }
 }
 
