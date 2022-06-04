@@ -360,22 +360,22 @@ impl Multimethod {
         self.receivers
             .iter()
             // Filter out any receivers which don't have a matching signature.
-            .filter(|receiver| {
+            .filter(|recv| {
                 !self::match_pattern(
-                    receiver.signature.clone(),
+                    recv.signature.clone(),
                     call.signature.clone(),
                 )
             })
             // Convert the matching receivers to a tuple containing the extracted variables,
             // the body expression and the pattern's precedence to simplify sorting later.
-            .map(|receiver| {
+            .map(|recv| {
                 Ok((
                     // Extract the variables which will be bound to function scope.
                     self::match_pattern_and_extract(
-                        receiver.signature.clone(),
+                        recv.signature.clone(),
                         call.signature.clone()
                     ),
-                    receiver.body.clone(),
+                    recv.body.clone(),
                     self::get_precedence(call.signature.clone()),
                 ))
             })
