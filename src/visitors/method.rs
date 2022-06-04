@@ -27,9 +27,11 @@ impl Visitor for MethodVisitor {
             // Add the new receiver to the multimethod.
             multimethod.define(method.signature, method.body);
         } else {
-            // Create a new multimethod and insert the new receiver.
-            let multimethod = Multimethod::from(method.signature, method.body);
-            interpreter.methods.insert(method.name.clone(), multimethod);
+            // Create a new multimethod with the given receiver and register it in the interpreter.
+            interpreter.methods.insert(
+                method.name.clone(),
+                Multimethod::from(method.signature, method.body)
+            );
         }
         Ok(Box::new(
             Expression {
