@@ -1,4 +1,5 @@
 mod call;
+mod method;
 
 pub use self::call::*;
 
