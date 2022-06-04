@@ -4,21 +4,36 @@ use crate::visitors::Visitor;
 use crate::interpreter::{
     Interpreter,
     InterpreterResult,
+    InterpreterError,
 };
 
 use magc::types::{Call, Expression, ExpressionKind, Literal};
+use magc::type_system::Typed;
 
 pub struct CallVisitor;
 
-impl Visitor<Call> for CallVisitor {
-    fn parse(
-        &self,
+impl Visitor for CallVisitor {
+    fn evaluate(
         interpreter: &mut Interpreter,
         environment_opt: Option<Environment>,
-        expr: Call,
+        expression: Expression,
     ) -> InterpreterResult {
 
-        interpreter.get_multimethod(&expr.name)?
-            .call(expr, environment_opt)
+        let call = self::expect_call(expression)?;
+
+        interpreter
+            .get_multimethod(&call.name)?
+            .call(call, environment_opt)
+    }
+}
+
+fn expect_call(expression: Expression) -> Result<Call, InterpreterError> {
+    match expression.kind {
+        ExpressionKind::Call(call) => Ok(call),
+
+        _ => Err(InterpreterError::UnexpectedType {
+            expected: String::from("CallExpression"),
+            found: expression.get_type(),
+        }),
     }
 }
