@@ -1,5 +1,5 @@
 use crate::types::environment::Environment;
-use crate::visitors::Visitor;
+use super::Visitor;
 
 use crate::interpreter::{
     Interpreter,

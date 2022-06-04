@@ -1,8 +1,10 @@
+pub mod visitors;
+
 use std::collections::{HashMap, BTreeMap};
 
 use crate::types::environment::Environment;
 
-use crate::visitors::{
+use self::visitors::{
     Visitor,
     CallVisitor,
 };
