@@ -2,6 +2,8 @@ use std::collections::{HashMap, BTreeMap};
 
 use crate::types::environment::Environment;
 
+use crate::visitors::Visitor;
+
 use magc::type_system::Typed;
 
 use magc::types::{
@@ -23,6 +25,7 @@ pub type InterpreterResult = Result<Box<Expression>, InterpreterError>;
 pub struct Interpreter {
     environment: Environment,
     methods: HashMap<String, Multimethod>,
+    visitors: HashMap<String, &'static dyn Visitor>,
     recursion_level: usize,
 }
 
@@ -31,6 +34,7 @@ impl Interpreter {
         Self {
             environment: Environment::new(),
             methods:     HashMap::new(),
+            visitors:    HashMap::new(),
             recursion_level: 0,
         }
     }
