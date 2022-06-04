@@ -1,6 +1,8 @@
 mod call;
 
 pub use self::call::*;
+
+use crate::types::environment::Environment;
 use crate::interpreter::{
     Interpreter,
     InterpreterResult,
@@ -11,6 +13,7 @@ pub trait Visitor<K> {
     fn parse(
         &self,
         interpreter: &mut Interpreter,
-        kind: K,
+        environment_opt: Option<Environment>,
+        expr: K,
     ) -> InterpreterResult;
 }
