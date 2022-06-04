@@ -235,7 +235,7 @@ impl Interpreter {
                 kind: ExpressionKind::Identifier,
                 start_pos: 0,
                 end_pos: 0,
-                lexeme: call.name,
+                lexeme: call.name.clone(),
             }
         ))
     }
@@ -331,13 +331,13 @@ impl Multimethod {
     }
 
     pub fn call(&self, call: Call, environment_opt: Option<Environment>) -> Result<Box<Expression>, InterpreterError> {
-        let mut sorted_receivers = self.find_matching_receivers(call, environment_opt)?;
+        let mut matching_receivers = self.find_matching_receivers(call.clone(), environment_opt)?;
 
         // Sort the receivers so the one with the highest precedence value goes first.
-        sorted_receivers.sort_by(|a, b| b.2.cmp(&a.2));
+        matching_receivers.sort_by(|a, b| b.2.cmp(&a.2));
 
-        if sorted_receivers.len() >= 1 {
-            println!("{:#?}", sorted_receivers.first());
+        if matching_receivers.len() >= 1 {
+            println!("{:#?}", matching_receivers.first());
         } else {
             return Err(InterpreterError::NoMatchingReceiver)
         }
