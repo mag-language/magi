@@ -26,10 +26,10 @@ use magc::types::{
 pub type InterpreterResult = Result<Box<Expression>, InterpreterError>;
 
 pub struct Interpreter {
-    environment: Environment,
-    methods: HashMap<String, Multimethod>,
-    visitors: HashMap<String, &'static dyn Visitor>,
-    recursion_level: usize,
+    pub environment: Environment,
+    pub methods: HashMap<String, Multimethod>,
+    pub visitors: HashMap<String, &'static dyn Visitor>,
+    pub recursion_level: usize,
 }
 
 impl Interpreter {
