@@ -1,6 +1,6 @@
 use crate::types::environment::Environment;
-use crate::types::Multimethod;
-use super::Visitor;
+use crate::interpreter::Multimethod;
+use crate::visitors::Visitor;
 
 use crate::interpreter::{
     Interpreter,

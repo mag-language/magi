@@ -43,9 +43,9 @@ impl Multimethod {
     }
 
     /// Try to find a matching receiver, run its body with the bound variables and return a value, if any.
-    pub fn call(&self, call: Call, environment_opt: Option<Environment>) -> Result<Box<Expression>, InterpreterError> {
+    pub fn call(&self, call: Call, optional_env: Option<Environment>) -> Result<Box<Expression>, InterpreterError> {
         // Find matching receivers and sort them so the one with the highest precedence value goes first.
-        let mut matching_receivers = self.find_matching_receivers(call.clone(), environment_opt)?;
+        let mut matching_receivers = self.find_matching_receivers(call.clone(), optional_env)?;
         matching_receivers.sort_by(|a, b| b.2.cmp(&a.2));
 
         if matching_receivers.len() >= 1 {
@@ -64,7 +64,7 @@ impl Multimethod {
 
     fn find_matching_receivers(&self,
         call: Call,
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Vec<(Environment, Box<Expression>, usize)>, InterpreterError> {
 
         self.receivers

@@ -59,26 +59,26 @@ impl Interpreter {
         // The expression to evaluate.
         expression: Box<Expression>,
         // An optional environment used for variables in local scope.
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Box<Expression>, InterpreterError> {
         println!("evaluating: --- {:#?}", expression.kind);
 
         match self.visitors.get(&expression.get_type().unwrap()) {
-            Some(visitor) => visitor.evaluate(self, environment_opt, *expression),
+            Some(visitor) => visitor.evaluate(self, optional_env, *expression),
 
             _ => Err(InterpreterError::Unimplemented),
         }
 
         /*match expression.kind {
             ExpressionKind::Method(method) => self.define_method(method),
-            ExpressionKind::Call(call)     => self.call_method(call, environment_opt),
+            ExpressionKind::Call(call)     => self.call_method(call, optional_env),
             ExpressionKind::Literal(_)     => { return Ok(expression) },
             ExpressionKind::List(_)        => { return Ok(expression) },
             ExpressionKind::Type           => { return Ok(expression) },
-            ExpressionKind::Infix(infix)   => self.evaluate_infix(infix, environment_opt),
+            ExpressionKind::Infix(infix)   => self.evaluate_infix(infix, optional_env),
             ExpressionKind::Pattern(pattern) => Ok(Box::new(Expression {
                 // Unwrap is safe here because there is always a pattern in the expression.
-                kind: ExpressionKind::Pattern(self.evaluate_pattern(Some(pattern), environment_opt)?.unwrap()),
+                kind: ExpressionKind::Pattern(self.evaluate_pattern(Some(pattern), optional_env)?.unwrap()),
                 start_pos: expression.start_pos,
                 end_pos: expression.end_pos,
                 lexeme: expression.lexeme,
@@ -177,19 +177,19 @@ impl Interpreter {
     fn evaluate_pattern(
         &mut self,
         pattern: Option<Pattern>,
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Option<Pattern>, InterpreterError> {
         match pattern {
             None => Ok(None),
 
             Some(Pattern::Value(value_pattern)) => Ok(
                 Some(Pattern::Value(ValuePattern {
-                    expression: self.evaluate(value_pattern.expression.clone(), environment_opt)?,
+                    expression: self.evaluate(value_pattern.expression.clone(), optional_env)?,
                 }))
             ),
 
             Some(Pattern::Variable(variable_pattern)) => {
-                if let Some(env) = environment_opt {
+                if let Some(env) = optional_env {
                     if let Some(expr) = env.entries.get(&variable_pattern) {
                         Ok(Some(Pattern::Value(ValuePattern {
                             expression: expr.clone(),
@@ -222,7 +222,7 @@ impl Interpreter {
 
     /**fn sort_receivers(&self,
         receivers: HashMap<Option<Pattern>, Box<Expression>>,
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Vec<(Option<Pattern>, Box<Expression>)>, InterpreterError> {
 
         let receivers_vec: Vec<(Option<Pattern>, Box<Expression>)> = receivers
@@ -243,7 +243,7 @@ impl Interpreter {
         &mut self,
         call: Call,
         // An optional environment used for variables in local scope.
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Box<Expression>, InterpreterError> {
         if self.recursion_level >= 4 {
             return Err(InterpreterError::TooMuchRecursion)
@@ -280,10 +280,10 @@ impl Interpreter {
         &mut self,
         infix: Infix,
         // An optional environment used for variables in local scope.
-        environment_opt: Option<Environment>,
+        optional_env: Option<Environment>,
     ) -> Result<Box<Expression>, InterpreterError> {
-        let left = self.evaluate(infix.left.clone(), environment_opt.clone())?.clone();
-        let right = self.evaluate(infix.right.clone(), environment_opt.clone())?.clone();
+        let left = self.evaluate(infix.left.clone(), optional_env.clone())?.clone();
+        let right = self.evaluate(infix.right.clone(), optional_env.clone())?.clone();
 
         let signature = Some(Pattern::Pair(
             PairPattern {
@@ -297,7 +297,7 @@ impl Interpreter {
                 name: infix.operator.lexeme,
                 signature,
             },
-            environment_opt,
+            optional_env,
         )
     }
 }
