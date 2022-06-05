@@ -3,6 +3,12 @@ pub enum Obj {
     Multimethod,
     /// A capitalized type identifier.
     Type,
+    /// A 64-bit signed integer value.
+    Int64(i64),
+    /// A 64-bit unsigned integer value.
+    UInt64(u64),
+    /// A 64-bit float value.
+    Float64(f64),
     /// A first-class chunk of code that can be passed around as a value.
     BlockExpression,
     /// A call of a method with a given set of arguments.
