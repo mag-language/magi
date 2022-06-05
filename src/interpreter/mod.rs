@@ -10,6 +10,7 @@ use crate::types::{
 use self::visitors::{
     Visitor,
     CallVisitor,
+    MethodVisitor,
 };
 
 use magc::type_system::Typed;
@@ -41,7 +42,8 @@ impl Interpreter {
     pub fn new() -> Self {
         let mut visitors = HashMap::new();
 
-        visitors.insert("CallExpression".to_string(), &CallVisitor as &dyn Visitor);
+        visitors.insert("CallExpression".to_string(),   &CallVisitor   as &dyn Visitor);
+        visitors.insert("MethodExpression".to_string(), &MethodVisitor as &dyn Visitor);
 
         Self {
             environment: Environment::new(),
