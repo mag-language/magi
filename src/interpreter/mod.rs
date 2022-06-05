@@ -68,24 +68,6 @@ impl Interpreter {
 
             _ => Err(InterpreterError::Unimplemented),
         }
-
-        /*match expression.kind {
-            ExpressionKind::Method(method) => self.define_method(method),
-            ExpressionKind::Call(call)     => self.call_method(call, optional_env),
-            ExpressionKind::Literal(_)     => { return Ok(expression) },
-            ExpressionKind::List(_)        => { return Ok(expression) },
-            ExpressionKind::Type           => { return Ok(expression) },
-            ExpressionKind::Infix(infix)   => self.evaluate_infix(infix, optional_env),
-            ExpressionKind::Pattern(pattern) => Ok(Box::new(Expression {
-                // Unwrap is safe here because there is always a pattern in the expression.
-                kind: ExpressionKind::Pattern(self.evaluate_pattern(Some(pattern), optional_env)?.unwrap()),
-                start_pos: expression.start_pos,
-                end_pos: expression.end_pos,
-                lexeme: expression.lexeme,
-            })),
-
-            _ => Err(InterpreterError::Unimplemented),
-        }*/
     }
 
     fn define_method(
