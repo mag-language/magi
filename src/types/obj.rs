@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub, Mul, Div};
+use std::cmp::PartialEq;
 use uuid::Uuid;
 
 use crate::interpreter::InterpreterError;
@@ -15,7 +16,7 @@ use magc::types::{
     Pattern,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Obj {
     uuid: Uuid,
     kind: ObjKind,
@@ -27,6 +28,12 @@ impl Obj {
             uuid: Uuid::new_v4(),
             kind,
         }
+    }
+}
+
+impl PartialEq for Obj {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind
     }
 }
 
