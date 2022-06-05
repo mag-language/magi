@@ -15,7 +15,7 @@ use super::Environment;
 
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Multimethod {
     pub receivers: Vec<Receiver>,
 }

@@ -3,7 +3,7 @@ use magc::types::{
     Pattern,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Receiver {
     pub signature: Option<Pattern>,
     pub body:      Box<Expression>,
