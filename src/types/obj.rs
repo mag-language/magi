@@ -231,12 +231,13 @@ impl Div for Obj {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::ObjKind::*;
 
     #[test]
     fn add_int_to_int() {
         assert_eq!(
-            (Obj::Int(32) + Obj::Int(32)).unwrap(),
-            Obj::Int(64),
-        );
+            (Obj::new(Int(32)) + (Obj::new(Int(32)))).unwrap(),
+            Obj::new(Int(64)),
+        )
     }
 }
