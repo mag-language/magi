@@ -4,7 +4,7 @@ pub mod multimethod;
 
 pub use self::environment::Environment;
 pub use self::multimethod::*;
-pub use self::obj::Obj;
+pub use self::obj::{Obj, ObjKind};
 
 use crate::interpreter::{
     Interpreter,
