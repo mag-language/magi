@@ -2,6 +2,7 @@ mod call;
 mod method;
 
 pub use self::call::*;
+pub use self::method::*;
 
 use crate::types::environment::Environment;
 use crate::interpreter::{
