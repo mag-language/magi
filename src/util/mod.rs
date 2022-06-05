@@ -12,38 +12,43 @@ use magc::types::{
     Block,
 };
 
-use crate::types::Obj;
+use crate::types::{
+    Obj,
+    ObjKind,
+};
 
 /// Convert an [`Expression`] into an [`Obj`].
 pub fn expr_to_obj(expression: Expression) -> Obj {
-    match expression.kind {
-        ExpressionKind::Conditional(conditional) => Obj::ConditionalExpression(conditional),
-        ExpressionKind::List(optional_expr)      => Obj::List(optional_expr),
+    let kind = match expression.kind {
+        ExpressionKind::Conditional(conditional) => ObjKind::ConditionalExpression(conditional),
+        ExpressionKind::List(optional_expr)      => ObjKind::List(optional_expr),
         ExpressionKind::Literal(literal)         => {
             match literal {
-                Literal::Int     => Obj::Int(expression.lexeme.parse::<i64>().unwrap()),
-                Literal::Float   => Obj::Float(expression.lexeme.parse::<f64>().unwrap()),
-                Literal::String  => Obj::String(expression.lexeme),
+                Literal::Int     => ObjKind::Int(expression.lexeme.parse::<i64>().unwrap()),
+                Literal::Float   => ObjKind::Float(expression.lexeme.parse::<f64>().unwrap()),
+                Literal::String  => ObjKind::String(expression.lexeme),
                 Literal::Boolean => {
                     match expression.lexeme.as_str() {
-                        "true"  => Obj::Bool(true),
-                        "false" => Obj::Bool(false),
+                        "true"  => ObjKind::Bool(true),
+                        "false" => ObjKind::Bool(false),
 
                         _ => unreachable!(),
                     }
                 },
             }
         },
-        ExpressionKind::Pattern(pattern) => Obj::Pattern(pattern),
-        ExpressionKind::Prefix(prefix)   => Obj::PrefixExpression(prefix),
-        ExpressionKind::Infix(infix)     => Obj::InfixExpression(infix),
-        ExpressionKind::Call(call)       => Obj::CallExpression(call),
-        ExpressionKind::Method(method)   => Obj::MethodExpression(method),
-        ExpressionKind::Block(block)     => Obj::BlockExpression(block),
-        ExpressionKind::Identifier       => Obj::Pattern(Pattern::Variable(VariablePattern {
+        ExpressionKind::Pattern(pattern) => ObjKind::Pattern(pattern),
+        ExpressionKind::Prefix(prefix)   => ObjKind::PrefixExpression(prefix),
+        ExpressionKind::Infix(infix)     => ObjKind::InfixExpression(infix),
+        ExpressionKind::Call(call)       => ObjKind::CallExpression(call),
+        ExpressionKind::Method(method)   => ObjKind::MethodExpression(method),
+        ExpressionKind::Block(block)     => ObjKind::BlockExpression(block),
+        ExpressionKind::Identifier       => ObjKind::Pattern(Pattern::Variable(VariablePattern {
             name: Some(expression.lexeme),
             type_id: None,
         })),
-        ExpressionKind::Type             => Obj::Type(expression.lexeme),
-    }
+        ExpressionKind::Type             => ObjKind::Type(expression.lexeme),
+    };
+
+    Obj::new(kind)
 }
