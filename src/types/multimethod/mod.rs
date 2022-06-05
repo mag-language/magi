@@ -71,7 +71,7 @@ impl Multimethod {
             .iter()
             // Filter out any receivers which don't have a matching signature.
             .filter(|recv| {
-                !self::match_pattern(
+                self::match_pattern(
                     recv.signature.clone(),
                     call.signature.clone(),
                 )
