@@ -1,4 +1,4 @@
-use crate::types::{Environment, Obj, ObjKind};
+use crate::types::{Environment, Obj, ObjKind, VariablePattern, Multimethod};
 use super::Visitor;
 
 use crate::interpreter::{
@@ -22,8 +22,9 @@ impl Visitor for CallVisitor {
 
         let call = self::expect_call(obj)?;
 
-        interpreter
-            .get_multimethod(&call.name)?
+        let variable = interpreter.get_variable(VariablePattern::from_name(call.name.clone()))?;
+
+        self::expect_multimethod(*variable)?
             .call(call, optional_env)
     }
 }
@@ -43,6 +44,17 @@ fn expect_call(obj: Obj) -> Result<Call, InterpreterError> {
 
         _ => Err(InterpreterError::UnexpectedType {
             expected: String::from("CallExpression"),
+            found: obj.get_type(),
+        }),
+    }
+}
+
+fn expect_multimethod(obj: Obj) -> Result<Multimethod, InterpreterError> {
+    match obj.kind {
+        ObjKind::Multimethod(multimethod) => Ok(multimethod),
+
+        _ => Err(InterpreterError::UnexpectedType {
+            expected: String::from("Multimethod"),
             found: obj.get_type(),
         }),
     }

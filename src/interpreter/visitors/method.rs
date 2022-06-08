@@ -23,9 +23,9 @@ impl Visitor for MethodVisitor {
     ) -> InterpreterResult {
 
         let method = self::expect_method(obj)?;
-        let name   = VariablePattern { name: Some(method.name.clone()), type_id: None };
+        let pattern   = VariablePattern { name: Some(method.name.clone()), type_id: None };
 
-        match interpreter.get_variable(name) {
+        match interpreter.get_variable(pattern.clone()) {
             // There is already a multimethod with this name, so try to insert the new receiver.
             Ok(obj) => {
                 let mut multimethod = self::expect_multimethod(*obj)?;
@@ -34,6 +34,11 @@ impl Visitor for MethodVisitor {
                 multimethod.define(
                     self::pattern_or_none(method.signature),
                     Box::new(Obj::from(*method.body)),
+                )?;
+
+                interpreter.mutate_variable(
+                    pattern,
+                    Obj::new(ObjKind::Multimethod(multimethod)),
                 )?;
             },
 
@@ -46,10 +51,10 @@ impl Visitor for MethodVisitor {
                 );
 
                 // Create a new multimethod with the given receiver and register it in the interpreter.
-                interpreter.methods.insert(
-                    method.name.clone(),
-                    multimethod,
-                );
+                interpreter.mutate_variable(
+                    pattern,
+                    Obj::new(ObjKind::Multimethod(multimethod)),
+                )?;
             },
 
             Err(e) => return Err(e),
