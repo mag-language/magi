@@ -8,6 +8,8 @@ use magc::types::{
     Call,
 };
 
+use magc::types::Pattern as MagcPattern;
+
 use crate::types::{
     Obj,
     ObjKind,
@@ -49,9 +51,25 @@ impl Multimethod {
     }
 
     /// Try to find a matching receiver, run its body with the bound variables and return a value, if any.
-    pub fn call(&self, interpreter: &mut Interpreter, call: Call) -> Result<Box<Obj>, InterpreterError> {
+    pub fn call(&self, interpreter: &mut Interpreter, signature: Option<MagcPattern>) -> Result<Box<Obj>, InterpreterError> {
+        let evaluated_signature;
+
+        if let Some(magc_pattern) = signature {
+            let obj = interpreter.evaluate(
+                Box::new(
+                    Obj::new(ObjKind::Pattern(Pattern::from(magc_pattern)))
+                ),
+                None,
+            )?;
+
+            evaluated_signature = Some(self::expect_pattern(*obj)?);
+        } else {
+            evaluated_signature = None;
+        };
+
         // Find matching receivers and sort them so the one with the highest precedence value goes first.
-        let mut matching_receivers = self.find_matching_receivers(call.clone())?;
+        let mut matching_receivers = self.find_matching_receivers(evaluated_signature)?;
+
         matching_receivers.sort_by(|a, b| b.2.cmp(&a.2));
 
         if matching_receivers.len() >= 1 {
@@ -67,7 +85,7 @@ impl Multimethod {
     }
 
     fn find_matching_receivers(&self,
-        call: Call,
+        reference_sig: Option<Pattern>,
     ) -> Result<Vec<(Environment, Box<Obj>, usize)>, InterpreterError> {
 
         self.receivers
@@ -76,7 +94,7 @@ impl Multimethod {
             .filter(|recv| {
                 self::match_pattern(
                     if let Some(s) = &recv.signature { Some(Pattern::from(s.clone())) } else { None },
-                    if let Some(s) = &call.signature { Some(Pattern::from(s.clone())) } else { None },
+                    if let Some(s) = &reference_sig  { Some(Pattern::from(s.clone())) } else { None },
                 )
             })
             // Convert the matching receivers to a tuple containing the extracted variables,
@@ -86,11 +104,11 @@ impl Multimethod {
                     // Extract the variables which will be bound to function scope.
                     self::match_pattern_and_extract(
                         if let Some(s) = &recv.signature { Some(Pattern::from(s.clone())) } else { None },
-                        if let Some(s) = &call.signature { Some(Pattern::from(s.clone())) } else { None },
+                        if let Some(s) = &reference_sig  { Some(Pattern::from(s.clone())) } else { None },
                     ),
                     recv.body.clone(),
                     self::get_precedence(
-                        if let Some(s) = &call.signature { Some(Pattern::from(s.clone())) } else { None },
+                        if let Some(s) = &reference_sig { Some(Pattern::from(s.clone())) } else { None },
                     ),
                 ))
             })
@@ -102,6 +120,15 @@ fn get_precedence(item: Option<Pattern>) -> usize {
     match item {
         Some(pattern) => pattern.get_precedence(),
         None          => 0,
+    }
+}
+
+fn expect_pattern(obj: Obj) -> Result<Pattern, InterpreterError> {
+    match obj.kind {
+        ObjKind::Pattern(pattern) => Ok(pattern),
+
+        // TODO: do correct error reporting here.
+        _ => return Err(InterpreterError::NoMatch)
     }
 }
 
