@@ -35,7 +35,6 @@ pub type InterpreterResult = Result<Box<Obj>, InterpreterError>;
 
 pub struct Interpreter {
     pub environment: Environment,
-    pub methods: HashMap<String, Multimethod>,
     pub visitors: HashMap<String, &'static dyn Visitor>,
     pub recursion_level: usize,
 }
@@ -54,7 +53,6 @@ impl Interpreter {
 
         Self {
             environment: Environment::new(),
-            methods:     HashMap::new(),
             visitors,
             recursion_level: 0,
         }
@@ -68,7 +66,7 @@ impl Interpreter {
         }
     }
 
-    pub fn define_global(&self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
+    pub fn set_variable(&self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
         if let None = self.environment.entries.get(&variable_pattern) {
             Ok(Box::new(obj))
         } else {
