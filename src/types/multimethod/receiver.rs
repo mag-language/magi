@@ -1,16 +1,13 @@
-use magc::types::{
-    Expression,
-    Pattern,
-};
+use crate::types::{Obj, Pattern};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Receiver {
     pub signature: Option<Pattern>,
-    pub body:      Box<Expression>,
+    pub body:      Box<Obj>,
 }
 
 impl Receiver {
-    pub fn from(signature: Option<Pattern>, body: Box<Expression>) -> Self {
+    pub fn from(signature: Option<Pattern>, body: Box<Obj>) -> Self {
         Self {
             signature,
             body,

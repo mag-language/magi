@@ -1,10 +1,11 @@
-use magc::*;
+use crate::types::VariablePattern;
+use crate::types::Obj;
 
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Environment {
-    pub entries: HashMap<VariablePattern, Box<Expression>>,
+    pub entries: HashMap<VariablePattern, Box<Obj>>,
 }
 
 impl Environment {
@@ -14,9 +15,22 @@ impl Environment {
         }
     }
 
-    pub fn from(map: HashMap<VariablePattern, Box<Expression>>) -> Self {
+    pub fn empty() -> Self {
         Self {
             entries: HashMap::new(),
         }
+    }
+
+    pub fn from(entries: HashMap<VariablePattern, Box<Obj>>) -> Self {
+        Self {
+            entries,
+        }
+    }
+
+    pub fn extend(&self, other: Self) -> Self {
+        let mut entries = self.entries.clone();
+        entries.extend(other.entries);
+
+        Self::from(entries)
     }
 }
