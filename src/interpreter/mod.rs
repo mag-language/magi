@@ -66,9 +66,27 @@ impl Interpreter {
         }
     }
 
-    pub fn set_variable(&self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
-        if let None = self.environment.entries.get(&variable_pattern) {
-            Ok(Box::new(obj))
+    pub fn define_variable(&mut self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
+        if !self.environment.entries.contains_key(&variable_pattern) {
+            self.environment.entries.insert(variable_pattern.clone(), Box::new(obj));
+
+            Ok(Box::new(Obj::new(
+                ObjKind::Pattern(Pattern::Variable(variable_pattern))
+            )))
+        } else {
+            Err(InterpreterError::VariableAlreadyExists)
+        }
+    }
+
+    pub fn mutate_variable(&mut self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
+        if self.environment.entries.contains_key(&variable_pattern) {
+            // Delete the previous entry and recreate it with the new object.
+            self.environment.entries.remove(&variable_pattern);
+            self.environment.entries.insert(variable_pattern.clone(), Box::new(obj));
+
+            Ok(Box::new(Obj::new(
+                ObjKind::Pattern(Pattern::Variable(variable_pattern))
+            )))
         } else {
             Err(InterpreterError::NoMatchingVariable)
         }
@@ -111,6 +129,7 @@ pub enum InterpreterError {
     UnexpectedType { expected: String, found: Option<String> },
     MethodAlreadyExists,
     SignatureAlreadyExists,
+    VariableAlreadyExists,
     NoMatchingReceiver,
     NoMatchingMultimethod,
     NoMatchingVariable,
