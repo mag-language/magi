@@ -5,6 +5,9 @@ use std::collections::{HashMap, BTreeMap};
 use crate::types::{
     Environment,
     Multimethod,
+    Obj,
+    ObjKind,
+    VariablePattern,
 };
 
 use self::visitors::{
@@ -23,13 +26,11 @@ use magc::types::{
     Call,
     Infix,
     Block,
-    Pattern,
-    PairPattern,
-    ValuePattern,
-    VariablePattern,
 };
 
-pub type InterpreterResult = Result<Box<Expression>, InterpreterError>;
+use crate::types::pattern::Pattern;
+
+pub type InterpreterResult = Result<Box<Obj>, InterpreterError>;
 
 pub struct Interpreter {
     pub environment: Environment,
@@ -53,109 +54,54 @@ impl Interpreter {
         }
     }
 
-    /// Interpret a given piece of code.
-    pub fn evaluate(
+    pub fn get_variable(&self, pattern: VariablePattern) -> InterpreterResult {
+        if let Some(value) = self.environment.entries.get(&pattern) {
+            Ok(value.clone())
+        } else {
+            Err(InterpreterError::NoMatchingVariable)
+        }
+    }
+
+    pub fn define_global(&self, variable_pattern: VariablePattern, obj: Obj) -> InterpreterResult {
+        if let None = self.environment.entries.get(&variable_pattern) {
+            Ok(Box::new(obj))
+        } else {
+            Err(InterpreterError::NoMatchingVariable)
+        }
+    }
+
+    pub fn evaluate_expr(
         &mut self,
         // The expression to evaluate.
         expression: Box<Expression>,
         // An optional environment used for variables in local scope.
         optional_env: Option<Environment>,
-    ) -> Result<Box<Expression>, InterpreterError> {
-        println!("evaluating: --- {:#?}", expression.kind);
+    ) -> Result<Box<Obj>, InterpreterError> {
 
-        match self.visitors.get(&expression.get_type().unwrap()) {
-            Some(visitor) => visitor.evaluate(self, optional_env, *expression),
+        self.evaluate(
+            Box::new(Obj::from(*expression)),
+            optional_env
+        )
+    }
+
+    /// Interpret a given piece of code and return the result.
+    pub fn evaluate(
+        &mut self,
+        // The expression to evaluate.
+        obj: Box<Obj>,
+        // An optional environment used for variables in local scope.
+        optional_env: Option<Environment>,
+    ) -> Result<Box<Obj>, InterpreterError> {
+
+        match self.visitors.get(&obj.get_type().unwrap()) {
+            Some(visitor) => visitor.evaluate(self, optional_env, *obj),
 
             _ => Err(InterpreterError::Unimplemented),
         }
     }
 
-    fn define_method(
-        &mut self,
-        method: Method,
-    ) -> Result<Box<Expression>, InterpreterError> {
-        if let Some(multimethod) = self.methods.get_mut(&method.name) {
-            multimethod.define(method.signature, method.body);
-        } else {
-            let m = Multimethod::from(method.signature, method.body);
-            self.methods.insert(method.name.clone(), m);
-        }
-        Ok(Box::new(
-            Expression {
-                kind: ExpressionKind::Identifier,
-                start_pos: 0,
-                end_pos: 0,
-                lexeme: method.name,
-            }
-        ))
-    }
-
-    fn do_arithmetic(&self, call: Call) -> Result<Box<Expression>, InterpreterError> {
-        if let Some(signature) = call.signature {
-            let pair = self.expect_pair(Box::new(signature))?;
-
-            let num = match call.name.as_str() {
-                "+" => self.expect_int(pair.left)? + self.expect_int(pair.right)?,
-                "-" => self.expect_int(pair.left)? - self.expect_int(pair.right)?,
-                "*" => self.expect_int(pair.left)? * self.expect_int(pair.right)?,
-                "/" => self.expect_int(pair.left)? / self.expect_int(pair.right)?,
     
-                _ => unreachable!(),
-            };
-
-            Ok(Box::new(Expression {
-                kind: ExpressionKind::Literal(Literal::Int),
-                lexeme: format!(
-                    "{}", 
-                    num,
-                ),
-                start_pos: 0,
-                end_pos: 0,
-            }))
-        } else {
-            Err(InterpreterError::Unimplemented)
-        }
-    }
-
-    fn expect_pair(&self, pattern: Box<Pattern>) -> Result<PairPattern, InterpreterError> {
-        match *pattern {
-            Pattern::Pair(pair) => Ok(pair),
-
-            _ => Err(
-                InterpreterError::UnexpectedType { 
-                    expected: "PairPattern".to_string(),
-                    found: pattern.get_type(),
-                }
-            )
-        }
-    }
-
-    fn expect_int(&self, pattern: Box<Pattern>) -> Result<i64, InterpreterError> {
-        match *pattern {
-            Pattern::Value(ValuePattern { expression }) => {
-                match expression.kind {
-                    ExpressionKind::Literal(Literal::Int) => {
-                        Ok(expression.lexeme.parse::<i64>().unwrap())
-                    },
-
-                    _ => Err(
-                        InterpreterError::UnexpectedType { 
-                            expected: "PairPattern".to_string(),
-                            found: None,
-                        }
-                    ),
-                }
-            },
-
-            _ => Err(
-                InterpreterError::UnexpectedType { 
-                    expected: "Int".to_string(),
-                    found: None,
-                }
-            )
-        }
-    }
-
+/*
     fn evaluate_pattern(
         &mut self,
         pattern: Option<Pattern>,
@@ -193,94 +139,13 @@ impl Interpreter {
             _ => Ok(pattern),
         }
     }
-
+*/
     pub fn get_multimethod(&self, name: &String) -> Result<Multimethod, InterpreterError> {
         if let Some(multimethod) = self.methods.get(name) {
             Ok(multimethod.clone())
         } else {
             Err(InterpreterError::NoMatchingMultimethod)
         }
-    }
-
-    /**fn sort_receivers(&self,
-        receivers: HashMap<Option<Pattern>, Box<Expression>>,
-        optional_env: Option<Environment>,
-    ) -> Result<Vec<(Option<Pattern>, Box<Expression>)>, InterpreterError> {
-
-        let receivers_vec: Vec<(Option<Pattern>, Box<Expression>)> = receivers
-            .iter()
-            .map(|&(reference_sig, body)| (reference_sig, body))
-            .collect();
-
-
-        receivers_vec
-            .iter()
-            .sort_by(|a, b| {
-                b.0.get_precedence().cmp(&a.0.get_precedence())
-            })
-            .collect()
-    }*/
-
-    fn call_method(
-        &mut self,
-        call: Call,
-        // An optional environment used for variables in local scope.
-        optional_env: Option<Environment>,
-    ) -> Result<Box<Expression>, InterpreterError> {
-        if self.recursion_level >= 4 {
-            return Err(InterpreterError::TooMuchRecursion)
-        }
-
-        println!("HANDLE CALL name: {}", call.name);
-        match call.name.as_str() {
-            "+" | "-" | "*" | "/" => return self.do_arithmetic(call),
-
-            _ => {},
-        }
-
-        Ok(Box::new(
-            Expression {
-                kind: ExpressionKind::Identifier,
-                start_pos: 0,
-                end_pos: 0,
-                lexeme: call.name.clone(),
-            }
-        ))
-    }
-
-    fn pattern_or_value_pattern(&self, expression: Box<Expression>) -> Pattern {
-        match expression.kind {
-            ExpressionKind::Pattern(pattern) => pattern,
-
-            _ => Pattern::Value(ValuePattern {
-                expression,
-            }),
-        }
-    }
-
-    fn evaluate_infix(
-        &mut self,
-        infix: Infix,
-        // An optional environment used for variables in local scope.
-        optional_env: Option<Environment>,
-    ) -> Result<Box<Expression>, InterpreterError> {
-        let left = self.evaluate(infix.left.clone(), optional_env.clone())?.clone();
-        let right = self.evaluate(infix.right.clone(), optional_env.clone())?.clone();
-
-        let signature = Some(Pattern::Pair(
-            PairPattern {
-                left:  Box::new(self.pattern_or_value_pattern(left)),
-                right: Box::new(self.pattern_or_value_pattern(right)),
-            }
-        ));
-
-        self.call_method(
-            Call {
-                name: infix.operator.lexeme,
-                signature,
-            },
-            optional_env,
-        )
     }
 }
 
@@ -293,5 +158,7 @@ pub enum InterpreterError {
     NoMatchingReceiver,
     NoMatchingMultimethod,
     NoMatchingVariable,
+    /// Raised when the linearization of two patterns fails.
+    NoMatch,
     TooMuchRecursion,
 }
