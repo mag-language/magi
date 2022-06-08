@@ -37,6 +37,20 @@ impl Obj {
     }
 }
 
+impl std::fmt::Display for Obj {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match &self.kind {
+            ObjKind::Int(int)     => write!(f, "{}", int),
+            ObjKind::UInt(uint)   => write!(f, "{}", uint),
+            ObjKind::Float(float) => write!(f, "{}", float),
+
+            _ => write!(f, "_"),
+        };
+
+        Ok(())
+    }
+}
+
 impl PartialEq for Obj {
     fn eq(&self, other: &Self) -> bool {
         self.kind == other.kind
