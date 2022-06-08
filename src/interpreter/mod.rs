@@ -103,54 +103,6 @@ impl Interpreter {
             _ => Err(InterpreterError::Unimplemented),
         }
     }
-
-    
-/*
-    fn evaluate_pattern(
-        &mut self,
-        pattern: Option<Pattern>,
-        optional_env: Option<Environment>,
-    ) -> Result<Option<Pattern>, InterpreterError> {
-        match pattern {
-            None => Ok(None),
-
-            Some(Pattern::Value(value_pattern)) => Ok(
-                Some(Pattern::Value(ValuePattern {
-                    expression: self.evaluate(value_pattern.expression.clone(), optional_env)?,
-                }))
-            ),
-
-            Some(Pattern::Variable(variable_pattern)) => {
-                if let Some(env) = optional_env {
-                    if let Some(expr) = env.entries.get(&variable_pattern) {
-                        Ok(Some(Pattern::Value(ValuePattern {
-                            expression: expr.clone(),
-                        })))
-                    } else {
-                        Err(InterpreterError::NoMatchingVariable)
-                    }
-                } else {
-                    if let Some(expr) = self.environment.entries.get(&variable_pattern) {
-                        Ok(Some(Pattern::Value(ValuePattern {
-                            expression: expr.clone(),
-                        })))
-                    } else {
-                        Err(InterpreterError::NoMatchingVariable)
-                    }
-                }
-            },
-
-            _ => Ok(pattern),
-        }
-    }
-*/
-    pub fn get_multimethod(&self, name: &String) -> Result<Multimethod, InterpreterError> {
-        if let Some(multimethod) = self.methods.get(name) {
-            Ok(multimethod.clone())
-        } else {
-            Err(InterpreterError::NoMatchingMultimethod)
-        }
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
