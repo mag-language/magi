@@ -7,3 +7,12 @@ pub struct VariablePattern {
     pub name:    Option<String>,
     pub type_id: Option<String>,
 }
+
+impl VariablePattern {
+    pub fn from_name(name: String) -> Self {
+        Self {
+            name:    Some(name),
+            type_id: None,
+        }
+    }
+}
