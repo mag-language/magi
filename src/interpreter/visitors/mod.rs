@@ -1,8 +1,10 @@
 mod call;
 mod method;
+mod value;
 
 pub use self::call::*;
 pub use self::method::*;
+pub use self::value::*;
 
 use crate::types::{Environment, Obj};
 use crate::interpreter::{
