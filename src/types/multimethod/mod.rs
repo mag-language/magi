@@ -14,6 +14,8 @@ use crate::types::{
     Pattern,
 };
 
+use crate::interpreter::Interpreter;
+
 use crate::interpreter::InterpreterError;
 use super::Environment;
 
@@ -47,25 +49,25 @@ impl Multimethod {
     }
 
     /// Try to find a matching receiver, run its body with the bound variables and return a value, if any.
-    pub fn call(&self, call: Call, optional_env: Option<Environment>) -> Result<Box<Obj>, InterpreterError> {
+    pub fn call(&self, interpreter: &mut Interpreter, call: Call) -> Result<Box<Obj>, InterpreterError> {
         // Find matching receivers and sort them so the one with the highest precedence value goes first.
-        let mut matching_receivers = self.find_matching_receivers(call.clone(), optional_env)?;
+        let mut matching_receivers = self.find_matching_receivers(call.clone())?;
         matching_receivers.sort_by(|a, b| b.2.cmp(&a.2));
 
         if matching_receivers.len() >= 1 {
-            println!("{:#?}", matching_receivers.first());
+            let (env, obj, _) = matching_receivers[0].clone();
+
+            interpreter.evaluate(
+                obj,
+                Some(env),
+            )
         } else {
             return Err(InterpreterError::NoMatchingReceiver)
         }
-
-        Ok(Box::new(
-            Obj::new(ObjKind::Type("Unimplemented".to_string()))
-        ))
     }
 
     fn find_matching_receivers(&self,
         call: Call,
-        optional_env: Option<Environment>,
     ) -> Result<Vec<(Environment, Box<Obj>, usize)>, InterpreterError> {
 
         self.receivers
