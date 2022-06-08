@@ -9,6 +9,11 @@ use crate::interpreter::{
 };
 
 use magc::type_system::Typed;
+use magc::types::{
+    Expression,
+    ExpressionKind,
+    Infix,
+};
 
 pub struct InfixVisitor;
 
