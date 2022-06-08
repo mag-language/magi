@@ -118,7 +118,7 @@ impl Interpreter {
         match self.visitors.get(&obj.get_type().unwrap()) {
             Some(visitor) => visitor.evaluate(self, optional_env, *obj),
 
-            _ => Err(InterpreterError::Unimplemented),
+            _ => Err(InterpreterError::NoMatchingVisitor),
         }
     }
 }
@@ -133,6 +133,7 @@ pub enum InterpreterError {
     NoMatchingReceiver,
     NoMatchingMultimethod,
     NoMatchingVariable,
+    NoMatchingVisitor,
     /// Raised when the linearization of two patterns fails.
     NoMatch,
     TooMuchRecursion,
