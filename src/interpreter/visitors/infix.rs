@@ -1,4 +1,4 @@
-use crate::types::{Environment, Obj, ObjKind};
+use crate::types::*;
 use crate::types::ObjKind::*;
 use super::Visitor;
 
@@ -33,7 +33,10 @@ impl Visitor for InfixVisitor {
         let right = interpreter.evaluate_expr(infix.right, optional_env)?;
 
         match infix.operator.kind {
-            TokenKind::Plus => Ok(Box::new((*left + *right)?)),
+            TokenKind::Plus  => Ok(Box::new((*left + *right)?)),
+            TokenKind::Minus => Ok(Box::new((*left - *right)?)),
+            TokenKind::Slash => Ok(Box::new((*left / *right)?)),
+            TokenKind::Star  => Ok(Box::new((*left * *right)?)),
 
             _ => Err(InterpreterError::Unimplemented),
         }
