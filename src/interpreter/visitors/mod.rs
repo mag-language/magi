@@ -4,7 +4,7 @@ mod method;
 pub use self::call::*;
 pub use self::method::*;
 
-use crate::types::environment::Environment;
+use crate::types::{Environment, Obj};
 use crate::interpreter::{
     Interpreter,
     InterpreterResult,
@@ -17,6 +17,6 @@ pub trait Visitor {
         &self,
         interpreter: &mut Interpreter,
         optional_env: Option<Environment>,
-        expr: Expression,
+        obj: Obj,
     ) -> InterpreterResult;
 }
