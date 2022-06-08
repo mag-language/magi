@@ -15,6 +15,7 @@ use self::visitors::{
     CallVisitor,
     MethodVisitor,
     ValueVisitor,
+    InfixVisitor,
 };
 
 use magc::type_system::Typed;
@@ -45,6 +46,7 @@ impl Interpreter {
 
         visitors.insert("CallExpression".to_string(),   &CallVisitor   as &dyn Visitor);
         visitors.insert("MethodExpression".to_string(), &MethodVisitor as &dyn Visitor);
+        visitors.insert("InfixExpression".to_string(),  &InfixVisitor as &dyn Visitor);
 
         visitors.insert("Int".to_string(),    &ValueVisitor as &dyn Visitor);
         visitors.insert("UInt".to_string(),   &ValueVisitor as &dyn Visitor);
