@@ -2,11 +2,13 @@ mod call;
 mod method;
 mod value;
 mod infix;
+mod pattern;
 
 pub use self::call::*;
 pub use self::method::*;
 pub use self::value::*;
 pub use self::infix::*;
+pub use self::pattern::*;
 
 use crate::types::{Environment, Obj};
 use crate::interpreter::{
