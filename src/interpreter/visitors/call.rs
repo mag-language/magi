@@ -25,7 +25,7 @@ impl Visitor for CallVisitor {
         let variable = interpreter.get_variable(VariablePattern::from_name(call.name.clone()))?;
 
         self::expect_multimethod(*variable)?
-            .call(call, optional_env)
+            .call(interpreter, call)
     }
 }
 
