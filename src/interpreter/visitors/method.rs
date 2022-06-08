@@ -51,14 +51,14 @@ impl Visitor for MethodVisitor {
                 );
 
                 // Create a new multimethod with the given receiver and register it in the interpreter.
-                interpreter.mutate_variable(
+                interpreter.define_variable(
                     pattern,
                     Obj::new(ObjKind::Multimethod(multimethod)),
                 )?;
             },
 
             Err(e) => return Err(e),
-        }
+        };
 
         Ok(Box::new(
             Obj::new(ObjKind::Type("Method".to_string()))
