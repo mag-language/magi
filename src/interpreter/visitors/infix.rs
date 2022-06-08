@@ -1,4 +1,4 @@
-use crate::types::{Environment, Obj};
+use crate::types::{Environment, Obj, ObjKind};
 use crate::types::ObjKind::*;
 use super::Visitor;
 
@@ -13,6 +13,8 @@ use magc::types::{
     Expression,
     ExpressionKind,
     Infix,
+    Token,
+    TokenKind,
 };
 
 pub struct InfixVisitor;
@@ -27,10 +29,14 @@ impl Visitor for InfixVisitor {
 
         let infix = self::expect_infix_expression(obj)?;
         
-        let left = interpreter.evaluate_expr(infix.left)?;
-        let right = interpreter.evaluate_expr(infix.right)?;
+        let left = interpreter.evaluate_expr(infix.left, optional_env.clone())?;
+        let right = interpreter.evaluate_expr(infix.right, optional_env)?;
 
-        // TODO: complete implementation
+        match infix.operator.kind {
+            TokenKind::Plus => Ok(Box::new((*left + *right)?)),
+
+            _ => Err(InterpreterError::Unimplemented),
+        }
     }
 }
 
@@ -43,14 +49,14 @@ fn expect_infix_expression(obj: Obj) -> Result<Infix, InterpreterError> {
                 Ok(method)
             } else {
                 Err(InterpreterError::UnexpectedType {
-                    expected: String::from("InfixExpression"),
+                    expected: format!("InfixExpression"),
                     found,
                 })
             }
         },
 
         _ => Err(InterpreterError::UnexpectedType {
-            expected: String::from("InfixExpression"),
+            expected: format!("InfixExpression"),
             found,
         }),
     }
