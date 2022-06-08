@@ -1,7 +1,6 @@
 pub mod types;
 pub mod interpreter;
 pub mod memory;
-pub mod util;
 
 #[cfg(test)]
 mod tests {
