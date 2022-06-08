@@ -34,16 +34,15 @@ impl Visitor for PatternVisitor {
         let pattern = self::expect_pattern(obj)?;
 
         match pattern {
-            Pattern::Variable(variable_pattern) => {
-
-            },
+            Pattern::Variable(variable_pattern) => interpreter.get_variable(variable_pattern),
+            Pattern::Value(value_pattern)       => Ok(Box::new(Obj::new(ObjKind::Pattern(Pattern::Value(
+                ValuePattern {
+                    obj: interpreter.evaluate(value_pattern.obj, optional_env)?,
+                }
+            ))))),
 
             _ => Ok(Box::new(Obj::new(ObjKind::Pattern(pattern))))
         }
-
-        Ok(Box::new(
-            Obj::new(ObjKind::Type("Method".to_string()))
-        ))
     }
 }
 
