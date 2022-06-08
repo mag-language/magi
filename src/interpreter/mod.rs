@@ -16,6 +16,7 @@ use self::visitors::{
     MethodVisitor,
     ValueVisitor,
     InfixVisitor,
+    PatternVisitor,
 };
 
 use magc::type_system::Typed;
@@ -52,6 +53,12 @@ impl Interpreter {
         visitors.insert("UInt".to_string(),   &ValueVisitor as &dyn Visitor);
         visitors.insert("Float".to_string(),  &ValueVisitor as &dyn Visitor);
         visitors.insert("String".to_string(), &ValueVisitor as &dyn Visitor);
+
+        visitors.insert("FieldPattern".to_string(),    &PatternVisitor as &dyn Visitor);
+        visitors.insert("PairPattern".to_string(),     &PatternVisitor as &dyn Visitor);
+        visitors.insert("TuplePattern".to_string(),    &PatternVisitor as &dyn Visitor);
+        visitors.insert("ValuePattern".to_string(),    &PatternVisitor as &dyn Visitor);
+        visitors.insert("VariablePattern".to_string(), &PatternVisitor as &dyn Visitor);
 
         Self {
             environment: Environment::new(),
