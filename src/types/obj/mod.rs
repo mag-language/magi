@@ -145,7 +145,15 @@ impl Typed for Obj {
     fn get_type(&self) -> Option<String> {
         Some(match self.kind.clone() {
             ObjKind::Multimethod(_) => String::from("Multimethod"),
-            ObjKind::Pattern(_)     => String::from("Pattern"),
+            ObjKind::Pattern(pattern)     => {
+                match pattern {
+                    Pattern::Field(_)    => String::from("FieldPattern"),
+                    Pattern::Pair(_)     => String::from("PairPattern"),
+                    Pattern::Tuple(_)    => String::from("TuplePattern"),
+                    Pattern::Value(_)    => String::from("ValuePattern"),
+                    Pattern::Variable(_) => String::from("VariablePattern"),
+                }
+            },
             ObjKind::Int(_)         => String::from("Int"),
             ObjKind::UInt(_)        => String::from("UInt"),
             ObjKind::Float(_)       => String::from("Float"),
