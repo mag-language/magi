@@ -1,3 +1,7 @@
+mod arithmetic;
+
+pub use self::arithmetic::*;
+
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
 use uuid::Uuid;
