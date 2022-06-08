@@ -1,5 +1,7 @@
-use crate::types::{Environment, Obj, ObjKind, VariablePattern, Multimethod};
-use super::Visitor;
+use crate::types::{Environment, Obj, ObjKind, VariablePattern, Multimethod, Pattern};
+use super::{
+    Visitor,
+};
 
 use crate::interpreter::{
     Interpreter,
@@ -21,11 +23,10 @@ impl Visitor for CallVisitor {
     ) -> InterpreterResult {
 
         let call = self::expect_call(obj)?;
-
         let variable = interpreter.get_variable(VariablePattern::from_name(call.name.clone()))?;
 
         self::expect_multimethod(*variable)?
-            .call(interpreter, call)
+            .call(interpreter, call.signature)
     }
 }
 
