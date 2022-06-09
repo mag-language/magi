@@ -39,6 +39,13 @@ impl Obj {
             kind,
         }
     }
+
+    pub fn is_truthy(&self) -> bool {
+        match &self.kind {
+            ObjKind::Boolean(true) => true,
+            _                      => false,
+        }
+    }
 }
 
 impl std::fmt::Display for Obj {
@@ -47,6 +54,8 @@ impl std::fmt::Display for Obj {
             ObjKind::Int(int)     => write!(f, "{}", int),
             ObjKind::UInt(uint)   => write!(f, "{}", uint),
             ObjKind::Float(float) => write!(f, "{}", float),
+            ObjKind::Boolean(boolean) => write!(f, "{:?}", boolean),
+            ObjKind::Nothing => write!(f, "nothing"),
 
             _ => write!(f, "_"),
         };
@@ -79,6 +88,7 @@ pub enum ObjKind {
     Boolean(bool),
     /// A sequence of characters encoded in UTF-8.
     String(String),
+    Nothing,
     /// A list of objects enclosed in brackets.
     List(Option<Box<Obj>>),
     /// A type which represents a Mag expression.
@@ -163,6 +173,8 @@ impl Typed for Obj {
 
             ObjKind::Expression(expression)  => return expression.get_type(),
             ObjKind::Type(type_id)           => type_id,
+
+            ObjKind::Nothing => String::from("Nothing"),
         })
     }
 }
