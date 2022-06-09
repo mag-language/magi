@@ -23,10 +23,10 @@ impl Visitor for CallVisitor {
     ) -> InterpreterResult {
 
         let call = self::expect_call(obj)?;
-        let variable = interpreter.get_variable(VariablePattern::from_name(call.name.clone()))?;
+        let variable = interpreter.get_variable(VariablePattern::from_name(call.name.clone()), None)?;
 
         self::expect_multimethod(*variable)?
-            .call(interpreter, call.signature)
+            .call(interpreter, call.signature, optional_env)
     }
 }
 
