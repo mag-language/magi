@@ -67,11 +67,19 @@ impl Interpreter {
         }
     }
 
-    pub fn get_variable(&self, pattern: VariablePattern) -> InterpreterResult {
-        if let Some(value) = self.environment.entries.get(&pattern) {
-            Ok(value.clone())
+    pub fn get_variable(&self, variable_pattern: VariablePattern, optional_env: Option<Environment>) -> InterpreterResult {
+        if let Some(env) = optional_env {
+            if let Some(value) = env.entries.get(&variable_pattern) {
+                Ok(value.clone())
+            } else {
+                Err(InterpreterError::NoMatchingVariable { variable_pattern })
+            }
         } else {
-            Err(InterpreterError::NoMatchingVariable)
+            if let Some(value) = self.environment.entries.get(&variable_pattern) {
+                Ok(value.clone())
+            } else {
+                Err(InterpreterError::NoMatchingVariable { variable_pattern })
+            }
         }
     }
 
@@ -97,7 +105,7 @@ impl Interpreter {
                 ObjKind::Pattern(Pattern::Variable(variable_pattern))
             )))
         } else {
-            Err(InterpreterError::NoMatchingVariable)
+            Err(InterpreterError::NoMatchingVariable { variable_pattern })
         }
     }
 
@@ -141,7 +149,7 @@ pub enum InterpreterError {
     VariableAlreadyExists,
     NoMatchingReceiver,
     NoMatchingMultimethod,
-    NoMatchingVariable,
+    NoMatchingVariable { variable_pattern: VariablePattern },
     NoMatchingVisitor,
     /// Raised when the linearization of two patterns fails.
     NoMatch,
