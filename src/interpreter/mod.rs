@@ -13,6 +13,7 @@ use crate::types::{
 use self::visitors::{
     Visitor,
     CallVisitor,
+    ConditionalVisitor,
     MethodVisitor,
     ValueVisitor,
     InfixVisitor,
@@ -45,14 +46,16 @@ impl Interpreter {
     pub fn new() -> Self {
         let mut visitors = HashMap::new();
 
-        visitors.insert("CallExpression".to_string(),   &CallVisitor   as &dyn Visitor);
-        visitors.insert("MethodExpression".to_string(), &MethodVisitor as &dyn Visitor);
-        visitors.insert("InfixExpression".to_string(),  &InfixVisitor as &dyn Visitor);
+        visitors.insert("CallExpression".to_string(),        &CallVisitor        as &dyn Visitor);
+        visitors.insert("ConditionalExpression".to_string(), &ConditionalVisitor as &dyn Visitor);
+        visitors.insert("MethodExpression".to_string(),      &MethodVisitor      as &dyn Visitor);
+        visitors.insert("InfixExpression".to_string(),       &InfixVisitor       as &dyn Visitor);
 
-        visitors.insert("Int".to_string(),    &ValueVisitor as &dyn Visitor);
-        visitors.insert("UInt".to_string(),   &ValueVisitor as &dyn Visitor);
-        visitors.insert("Float".to_string(),  &ValueVisitor as &dyn Visitor);
-        visitors.insert("String".to_string(), &ValueVisitor as &dyn Visitor);
+        visitors.insert("Int".to_string(),      &ValueVisitor as &dyn Visitor);
+        visitors.insert("UInt".to_string(),     &ValueVisitor as &dyn Visitor);
+        visitors.insert("Float".to_string(),    &ValueVisitor as &dyn Visitor);
+        visitors.insert("String".to_string(),   &ValueVisitor as &dyn Visitor);
+        visitors.insert("Boolean".to_string(), &ValueVisitor as &dyn Visitor);
 
         visitors.insert("FieldPattern".to_string(),    &PatternVisitor as &dyn Visitor);
         visitors.insert("PairPattern".to_string(),     &PatternVisitor as &dyn Visitor);
