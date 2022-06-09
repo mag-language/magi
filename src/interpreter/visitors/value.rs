@@ -22,11 +22,11 @@ impl Visitor for ValueVisitor {
 
         /// Values simply evaluate to themselves.
         match &obj.kind {
-            Int(_) | UInt(_) | Float(_) | String(_) => Ok(Box::new(obj)),
+            Int(_) | UInt(_) | Float(_) | String(_) | Boolean(_) => Ok(Box::new(obj)),
 
             _ => Err(InterpreterError::UnexpectedType { 
                 found: obj.get_type(),
-                expected: "Int | UInt | String | Float".to_string(),
+                expected: "Int | UInt | String | Float | Boolean".to_string(),
             })
         }
     }
