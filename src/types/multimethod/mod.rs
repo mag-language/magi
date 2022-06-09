@@ -51,7 +51,12 @@ impl Multimethod {
     }
 
     /// Try to find a matching receiver, run its body with the bound variables and return a value, if any.
-    pub fn call(&self, interpreter: &mut Interpreter, signature: Option<MagcPattern>) -> Result<Box<Obj>, InterpreterError> {
+    pub fn call(&self,
+        interpreter: &mut Interpreter,
+        signature: Option<MagcPattern>,
+        optional_env: Option<Environment>
+    ) -> Result<Box<Obj>, InterpreterError> {
+
         let evaluated_signature;
 
         if let Some(magc_pattern) = signature {
@@ -59,7 +64,7 @@ impl Multimethod {
                 Box::new(
                     Obj::new(ObjKind::Pattern(Pattern::from(magc_pattern)))
                 ),
-                None,
+                optional_env,
             )?;
 
             evaluated_signature = Some(self::expect_pattern(*obj)?);
