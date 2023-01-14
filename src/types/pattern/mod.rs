@@ -9,6 +9,7 @@ mod variable;
 use std::collections::HashMap;
 
 use magc::types::Pattern as MagcPattern;
+use magc::Typed;
 
 pub use self::field::FieldPattern;
 pub use self::pair::PairPattern;
@@ -127,9 +128,17 @@ impl Pattern {
         let mut variables = HashMap::new();
 
         if let Some(name) = reference.name {
-            // Extract value into environment and skip type checking for now.
+            // Extract value into environment and check types if there is an annotation.
             if let Pattern::Value(ValuePattern { obj }) = other {
-                variables.insert(VariablePattern { name: Some(name), type_id: None }, obj);
+                if let Some(type_id) = reference.type_id {
+                    if obj.get_type() == Some(type_id) {
+                        variables.insert(VariablePattern { name: Some(name), type_id: None }, obj);
+                    } else {
+                        return Err(InterpreterError::NoMatch)
+                    }
+                } else {
+                    variables.insert(VariablePattern { name: Some(name), type_id: None }, obj);
+                }
             } else {
                 // TODO: add proper error handling here!
                 return Err(InterpreterError::NoMatch)
