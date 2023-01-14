@@ -133,7 +133,7 @@ impl From<Expression> for Obj {
             },
 
             ExpressionKind::Pattern(pattern) => ObjKind::Pattern(Pattern::from(pattern)),
-            ExpressionKind::Type             => ObjKind::Type(expression.lexeme),
+            ExpressionKind::Type(type_id)    => ObjKind::Type(type_id),
 
             ExpressionKind::Literal(literal) => {
                 match literal {
