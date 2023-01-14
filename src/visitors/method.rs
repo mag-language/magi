@@ -38,7 +38,6 @@ impl Visitor for MethodVisitor {
                 kind: ExpressionKind::Identifier,
                 start_pos: 0,
                 end_pos: 0,
-                lexeme: method.name,
             }
         ))
     }
